@@ -1,16 +1,22 @@
 import {React} from "react";
+import { Router, useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 const Header = () => {
   const { data: session } = useSession();
+  const router = useRouter();
+  const {pathname} = router;
+
+  const active = "text-green-500 transition hover:text-gray-500/75 mx-4 bg-gray-200 p-2 rounded-md"
+  const inactive = "text-gray-500 transition hover:text-gray-500/75 mx-2"
   if (session) {
     return (
       <header class="bg-white border-b sticky top-0">
-        <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+        <div class="lg:px-8">
           <div class="flex h-16 items-center justify-between">
             <div class="flex-1 md:flex md:items-center md:gap-12">
-              <a class="block text-teal-600" href="/">
+              <Link class="block text-teal-600" href="/">
                 <span class="sr-only">Home</span>
                 <svg
                   class="h-8"
@@ -23,7 +29,7 @@ const Header = () => {
                     fill="currentColor"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
 
             <div class="md:flex md:items-center md:gap-12">
@@ -32,28 +38,28 @@ const Header = () => {
                  
                   <li>
                     <Link 
-                      className="text-gray-500 transition hover:text-gray-500/75 mx-2"
+                      className={location.pathname === '/' ? active:inactive}
                       href="/"
                     >Dashboard
                     </Link>
                     <Link 
-                      className="text-gray-500 transition hover:text-gray-500/75 mx-2"
-                      href="/"
+                      className={location.pathname === '/orders' ? active:inactive}
+                      href="/orders"
                     >Orders
                     </Link>
                     <Link 
-                      className="text-gray-500 transition hover:text-gray-500/75 mx-2"
-                      href="/"
+                      className={location.pathname === '/products' ? active:inactive}
+                      href="/products"
                     >Products
                     </Link>
                     <Link 
-                      className="text-gray-500 transition hover:text-gray-500/75 mx-2"
-                      href="/"
+                      className={location.pathname === '/categories' ? active:inactive}
+                      href="/categories"
                     >Categories
                     </Link>
                     <Link 
-                      className="text-gray-500 transition hover:text-gray-500/75 mx-2"
-                      href="/"
+                      className={location.pathname === '/settings' ? active:inactive}
+                      href="/settings"
                     >Settings
                     </Link>
                     
@@ -61,14 +67,17 @@ const Header = () => {
                 </ul>
               </nav>
 
+
               <div class="flex items-center gap-4">
                 <div class="sm:flex sm:gap-4">
                   {/*  */}
                   <div class="h-10 w-10">
-                    <img
+                    <Image
                       className="h-full w-full rounded-full object-cover object-center"
-                      src={session.user.image}
-                      alt=""
+                      // src={session.user.image}
+                      alt="pic"
+                      height={20}
+                      width={20}
                     />
                   </div>
                 </div>
@@ -92,10 +101,12 @@ const Header = () => {
                   </button>
                 </div>
               </div>
+              
             </div>
           </div>
         </div>
       </header>
+      
     );
   }
 };
