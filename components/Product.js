@@ -1,32 +1,59 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import Spinner from "./Spinner";
 export default function Product() {
-const [redirect,setRedirect] = useState(false)
-const router = useRouter()
+  const router = useRouter();
+  //states
+  const [redirect, setRedirect] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadImagesQueue = [];
+
   async function createProduct(ev) {
     ev.preventDefault();
-
-    const data = { title, description, price };
+ if (isUploading) {
+  await Promise.all(uploadImagesQueue)
+ }
+    const data = { title, description, price,image };
     await axios.post(`/api/products`, data);
 
-    setRedirect(true)
+    setRedirect(true);
   }
 
   async function uploadImages(ev) {
-    
+    const files = ev.target.files;
+    if (files?.length > 0) {
+      setIsUploading(true)
+      for (const file of files) {
+        const data = new FormData();
+        data.append("file", file);
+        uploadImagesQueue.push(
+          axios.post("/api/upload", data).then((res) => {
+            setImages((oldImages) => [...oldImages, ...res.data.links]);
+          })
+        );
+      }
+      await Promise.all(uploadImagesQueue);
+      setIsUploading(false)
+    } else {
+      return "An error occured";
+    }
   }
 
-  if(redirect) {
-    router.push('/products')
-    return null
+  if (redirect) {
+    router.push("/products");
+    return null;
   }
   return (
-    <form onSubmit={ev=>createProduct(ev)} className="mx-auto max-w-screen-sm">
+    <form
+      onSubmit={(ev) => createProduct(ev)}
+      className="mx-auto max-w-screen-sm"
+    >
       <>
         <div className="mx-auto my-4">
           <div>
@@ -112,9 +139,19 @@ const router = useRouter()
                   SVG, PNG, JPG or GIF (max. 800x400px)
                 </p>
               </div>
-              <input id="example5" type="file" class="sr-only" multiple accept="image/*" onChange={uploadImages} />
+              <input
+                id="example5"
+                type="file"
+                class="sr-only"
+                multiple
+                accept="image/*"
+                onChange={uploadImages}
+              />
             </label>
           </div>
+        </div>
+        <div className="grid grid-cols-2 items-center rounded">
+          {isUploading && (<Spinner className="mx-auto absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />)}
         </div>
         <div className="mx-auto my-4">
           <div>

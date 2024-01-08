@@ -5,10 +5,10 @@ export default async function handle(req,res){
 
     await mongooseConnect()
     if(method === 'POST'){
-        const {title,description,price} = req.body;
+        const {title,description,price,images} = req.body;
 
         const productDoc = await Product.create({
-            title,description,price
+            title,description,price,images
         })
         res.json(productDoc);
     }
